@@ -113,7 +113,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             }
 
             if(!helper.isValidServiceClientClass(element.asType())){
-                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(),ProcessorHelper.SERVICE_CLIENT_INTERFACE);
+                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(), ProcessorHelper.SERVICE_CLIENT_INTERFACE);
             }
 
             for(Element methodElement:element.getEnclosedElements()) {
@@ -164,7 +164,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             }
 
             if(!helper.isValidServiceServerClass(element.asType())){
-                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(),ProcessorHelper.SERVICE_SERVER_INTERFACE);
+                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(), ProcessorHelper.SERVICE_SERVER_INTERFACE);
             }
 
             for(Element methodElement:element.getEnclosedElements()) {

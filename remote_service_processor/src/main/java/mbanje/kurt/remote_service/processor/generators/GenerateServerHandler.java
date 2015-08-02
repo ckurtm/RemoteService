@@ -122,12 +122,12 @@ public class GenerateServerHandler {
                                 "         case $T.CONNECT:\n" +
                                 "            clients.add(msg.replyTo);\n" +
                                 "            $L message  = $L.obtain(null, $T.DISCONNECT);\n" +
-                                "            sendMsg(message);\n" +
+                                "            post(message);\n" +
                                 "            break;\n" +
                                 "         case $T.DISCONNECT:\n" +
                                 "            clients.remove(msg.replyTo);\n" +
                                 "            $L message1  = $L.obtain(null, $T.CONNECT);\n" +
-                                "            sendMsg(message1);\n" +
+                                "            post(message1);\n" +
                                 "            break;\n" +
                                 "         case $T.SHUTDOWN:\n" +
                                 "            (($T)service).stopSelf();\n" +
@@ -146,7 +146,7 @@ public class GenerateServerHandler {
 
     private MethodSpec getSendMsg() {
         ClassName remoteExceptionClass = ClassName.get("java.lang","Exception");
-        return MethodSpec.methodBuilder("sendMsg")
+        return MethodSpec.methodBuilder("post")
                 .returns(void.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ProcessorHelper.MESSAGE, "message")

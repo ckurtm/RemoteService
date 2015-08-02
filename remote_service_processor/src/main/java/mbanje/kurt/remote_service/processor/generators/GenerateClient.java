@@ -89,7 +89,7 @@ public class GenerateClient {
                                 "           serviceMessenger = new $T(service);\n" +
                                 "           bound=true;\n" +
                                 "           Log.d(TAG, \"service connected\");\n" +
-                                "           sendMsg($T.obtain(null, $T.CONNECT));\n" +
+                                "           post($T.obtain(null, $T.CONNECT));\n" +
                                 "}\n" +
                                 " \n" +
                                 " public void onServiceDisconnected($T className) {\n" +
@@ -167,7 +167,7 @@ public class GenerateClient {
                         .build();
                 builder.addParameter(arg);
             }
-            builder.addStatement("sendMsg($T.obtain(null,$L,$L))",ProcessorHelper.MESSAGE,method.variable.message,paramname);
+            builder.addStatement("post($T.obtain(null,$L,$L))", ProcessorHelper.MESSAGE,method.variable.message,paramname);
             methods.add(builder.build());
 
         }
@@ -189,8 +189,8 @@ public class GenerateClient {
                                 "}else{\n" +
                                 "   $T.d(TAG,\"not bound not connecting..\");\n" +
                                 "}"
-                        , serviceClass,ProcessorHelper.INTENT, serviceClass, ProcessorHelper.INTENT,
-                        serviceClass,ProcessorHelper.CONTEXT,ProcessorHelper.LOG,ProcessorHelper.LOG
+                        , serviceClass, ProcessorHelper.INTENT, serviceClass, ProcessorHelper.INTENT,
+                        serviceClass, ProcessorHelper.CONTEXT, ProcessorHelper.LOG, ProcessorHelper.LOG
                 )
                 .build();
     }
@@ -201,18 +201,18 @@ public class GenerateClient {
                 .addModifiers(Modifier.PUBLIC)
                 .addCode("if (bound) {\n" +
                         "   if(serviceMessenger != null) {\n" +
-                        "sendMsg($T.obtain(null,$T.DISCONNECT));\n" +
+                        "post($T.obtain(null,$T.DISCONNECT));\n" +
                         "}\n" +
                         "parent.unbindService(connection);\n" +
                         "bound = false;\n" +
                         "$T.d(TAG,\"disconnecting..\");\n" +
-                        "}", ProcessorHelper.MESSAGE,clientInterface,ProcessorHelper.LOG)
+                        "}", ProcessorHelper.MESSAGE,clientInterface, ProcessorHelper.LOG)
                 .build();
     }
 
     private MethodSpec getSendMsg() {
         ClassName remoteExceptionClass = ClassName.get("android.os","RemoteException");
-        return MethodSpec.methodBuilder("sendMsg")
+        return MethodSpec.methodBuilder("post")
                 .returns(boolean.class)
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ProcessorHelper.MESSAGE, "message")
