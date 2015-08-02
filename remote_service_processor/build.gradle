@@ -1,0 +1,6 @@
+apply plugin: 'java'
+
+dependencies {
+    compile 'com.squareup:javapoet:1.1.0'
+    compile project(':remote_service_annotation')
+}
