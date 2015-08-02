@@ -1,6 +1,74 @@
 apply plugin: 'java'
+apply plugin: 'com.jfrog.bintray'
 
 dependencies {
     compile 'com.squareup:javapoet:1.1.0'
     compile project(':remote_service_annotation')
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+def version_no = '1.0.1'
+def group_id = "mbanje.kurt"
+def artifact_id = "remote_service_processor"
+def siteUrl = 'https://github.com/ckurtm/RemoteService'
+def gitUrl = 'https://github.com/ckurtm/RemoteService.git'
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.key")
+    configurations = ['archives']
+
+    pkg {
+        repo = "maven"
+        name = "RemoteService"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+
+        version {
+            name = version_no
+            desc = 'Annotations to help with creating an Android Remote Service and get rid of all the boiler plate'
+            released  = new Date()
+            vcsTag = version_no
+        }
+    }
+}
+
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'jar'
+                name 'Annotations to help with creating an Android Remote Service and get rid of all the boiler plate.'
+                url siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'remote_service_processor'
+                        name 'Kurt Mbanje'
+                        email 'ckurtm@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+
+                }
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.5'
 }

@@ -25,53 +25,5 @@ allprojects {
     apply plugin: 'java'
 }
 
-apply plugin: 'com.jfrog.bintray'
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-def version_no = '1.0.2'
-def group_id = "mbanje.kurt"
-def artifact_id = "remote_service_processor"
-def siteUrl = 'https://github.com/ckurtm/RemoteService'
-def gitUrl = 'https://github.com/ckurtm/RemoteService.git'
-
-publishing {
-    publications {
-        RemoteServicePublication(MavenPublication) {
-            from components.java
-            groupId group_id
-            artifactId artifact_id
-            version version_no
-        }
-    }
-}
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.key")
-    publications = ['RemoteServicePublication']
-    configurations = ['archives']
-
-    pkg {
-        repo = "generic"
-        name = "RemoteService"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
-
-        version {
-            name = version_no
-            desc = 'Gradle Bintray Plugin 1.0 final'
-            released  = new Date()
-            vcsTag = version_no
-            attributes = ['gradle-plugin': 'mbanje.kurt:remote_service_processor:1.0.1']
-        }
-    }
-}
 
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.5'
-}
