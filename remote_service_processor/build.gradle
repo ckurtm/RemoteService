@@ -9,15 +9,29 @@ dependencies {
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
-def version_no = '1.0.1'
+def version_no = '1.0.2'
 def group_id = "mbanje.kurt"
 def artifact_id = "remote_service_processor"
 def siteUrl = 'https://github.com/ckurtm/RemoteService'
 def gitUrl = 'https://github.com/ckurtm/RemoteService.git'
 
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId group_id
+            artifactId artifact_id
+            version version_no
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
+
 bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.key")
+    publications = ['MyPublication']
     configurations = ['archives']
 
     pkg {
@@ -33,41 +47,26 @@ bintray {
             desc = 'Annotations to help with creating an Android Remote Service and get rid of all the boiler plate'
             released  = new Date()
             vcsTag = version_no
+            attributes = ['gradle-plugin': 'mbanje.kurt:remote_service_processor:1.0.3']
         }
     }
 }
 
-
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'jar'
-                name 'Annotations to help with creating an Android Remote Service and get rid of all the boiler plate.'
-                url siteUrl
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id 'remote_service_processor'
-                        name 'Kurt Mbanje'
-                        email 'ckurtm@gmail.com'
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-
-                }
-            }
-        }
-    }
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+// add javadoc/source jar tasks as artifacts
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.5'
