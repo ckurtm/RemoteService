@@ -1,10 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'com.jfrog.bintray'
 
-dependencies {
-    compile 'com.squareup:javapoet:1.1.0'
-    compile project(':remote_service_annotation')
-}
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -15,12 +10,13 @@ def artifact_id = "remote_service_processor"
 def siteUrl = 'https://github.com/ckurtm/RemoteService'
 def gitUrl = 'https://github.com/ckurtm/RemoteService.git'
 
+
 publishing {
     publications {
         MyPublication(MavenPublication) {
             from components.java
-            groupId group_id
-            artifactId artifact_id
+            groupId 'mbanje.kurt'
+            artifactId 'remote_service_processor'
             version version_no
             artifact sourcesJar
             artifact javadocJar
@@ -32,7 +28,6 @@ bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.key")
     publications = ['MyPublication']
-    configurations = ['archives']
 
     pkg {
         repo = "maven"
@@ -47,7 +42,7 @@ bintray {
             desc = 'Annotations to help with creating an Android Remote Service and get rid of all the boiler plate'
             released  = new Date()
             vcsTag = version_no
-            attributes = ['gradle-plugin': 'mbanje.kurt:remote_service_processor:1.0.3']
+            attributes = ['gradle-plugin': 'mbanje.kurt:remote_service_processor:1.0.2']
         }
     }
 }
@@ -70,4 +65,10 @@ artifacts {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.5'
+}
+
+
+dependencies {
+    compile 'com.squareup:javapoet:1.1.0'
+    compile project(':remote_service_annotation')
 }
