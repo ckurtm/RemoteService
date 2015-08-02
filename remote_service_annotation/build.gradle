@@ -15,6 +15,11 @@ def artifact_id = "remote_service_annotation"
 def siteUrl = 'https://github.com/ckurtm/RemoteService'
 def gitUrl = 'https://github.com/ckurtm/RemoteService.git'
 
+
+configurations {
+    spi
+}
+
 publishing {
     publications {
         MyPublication(MavenPublication) {
@@ -39,7 +44,7 @@ bintray {
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
-        publish = true
+        publish = false
 
         version {
             name = version_no
