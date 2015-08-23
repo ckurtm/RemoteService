@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>mbanje.kurt</groupId>
+    <artifactId>remote_service</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.2</version>
+
+    <name>remote-service</name>
+
+
+    <modules>
+        <module>remote-service-annotation</module>
+        <module>remote-service-processor</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <bintray.user>ckurtm</bintray.user>
+        <bintray.repo>RemoteService</bintray.repo>
+        <bintray.package>remote_service</bintray.package>
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+    </dependencies>
+
+
+    <!--<build>-->
+        <!--<pluginManagement>-->
+            <!--<plugins>-->
+                <!--<plugin>-->
+                    <!--<groupId>org.apache.maven.plugins</groupId>-->
+                    <!--<artifactId>maven-jar-plugin</artifactId>-->
+                    <!--<version>2.3.2</version>-->
+                <!--</plugin>-->
+                <!--<plugin>-->
+                    <!--<groupId>org.apache.maven.plugins</groupId>-->
+                    <!--<artifactId>maven-source-plugin</artifactId>-->
+                    <!--<version>2.1.2</version>-->
+                <!--</plugin>-->
+                <!--<plugin>-->
+                    <!--<artifactId>maven-release-plugin</artifactId>-->
+                    <!--<version>2.4.1</version>-->
+                    <!--<configuration>-->
+                        <!--<useReleaseProfile>false</useReleaseProfile>-->
+                        <!--<releaseProfiles>release</releaseProfiles>-->
+                        <!--<autoVersionSubmodules>true</autoVersionSubmodules>-->
+                    <!--</configuration>-->
+                <!--</plugin>-->
+            <!--</plugins>-->
+        <!--</pluginManagement>-->
+    <!--</build>-->
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <!-- Disable annotation processing for ourselves.-->
+                    <compilerArgument>-proc:none</compilerArgument>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
+    <distributionManagement>
+        <repository>
+            <id>bintray</id>
+            <url>https://api.bintray.com/maven/${bintray.user}/${bintray.repo}/${bintray.package}</url>
+        </repository>
+    </distributionManagement>
+
+
+    <scm>
+        <connection>scm:git:https://github.com/{github-user}/{github-repo}.git</connection>
+        <developerConnection>scm:git:git@github.com:{github-user}/{github-repo}.git</developerConnection>
+        <url>https://github.com/{github-user}/{github-repo}</url>
+        <tag>remote_service-1.0.2</tag>
+    </scm>
+</project>

@@ -1,4 +1,4 @@
-package mbanje.kurt.remote_service.processor.internal;
+package mbanje.kurt.remote_service.internal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,19 +8,19 @@ import javax.lang.model.element.Element;
 /**
  * Created by kurt on 29 07 2015 .
  */
-public class ServerMethod {
+public class ClientMethod {
 
     public String service;
     public Element clazz;
     public String name;
-    public List<ParameterServer> params = new ArrayList<>();
-    public int[] messages;
+    public int message;
+    public List<ParameterClient> params = new ArrayList<ParameterClient>();
 
-    public ServerMethod(String service, Element clazz, String name, int[] messages) {
+    public ClientMethod(String service,Element clazz,String name, int message) {
         this.service = service;
         this.name = name;
+        this.message = message;
         this.clazz = clazz;
-        this.messages = messages;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class ServerMethod {
                 "service='" + service + '\'' +
                 ", clazz='" + clazz + '\'' +
                 ", name='" + name + '\'' +
-                ", message=" + messages +
+                ", message=" + message +
                 ", params=" + params +
                 '}';
     }

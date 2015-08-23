@@ -1,4 +1,4 @@
-package mbanje.kurt.remote_service.processor.internal;
+package mbanje.kurt.remote_service.internal;
 
 import javax.lang.model.element.TypeElement;
 

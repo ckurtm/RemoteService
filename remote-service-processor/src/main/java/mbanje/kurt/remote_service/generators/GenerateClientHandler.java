@@ -1,4 +1,4 @@
-package mbanje.kurt.remote_service.processor.generators;
+package mbanje.kurt.remote_service.generators;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -7,6 +7,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import mbanje.kurt.remote_service.processor.Messenger;
+import mbanje.kurt.remote_service.processor.ProcessorHelper;
+import mbanje.kurt.remote_service.internal.ParameterServer;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,9 +19,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
-import mbanje.kurt.remote_service.processor.Messenger;
-import mbanje.kurt.remote_service.processor.ProcessorHelper;
-import mbanje.kurt.remote_service.processor.internal.ParameterServer;
+
 
 import static javax.lang.model.element.Modifier.PUBLIC;
 

@@ -1,12 +1,15 @@
 package mbanje.kurt.remote_service.processor;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import mbanje.kurt.remote_service.*;
+import mbanje.kurt.remote_service.generators.GenerateClient;
+import mbanje.kurt.remote_service.generators.GenerateClientHandler;
+import mbanje.kurt.remote_service.generators.GenerateServerHandler;
+import mbanje.kurt.remote_service.internal.ClientMethod;
+import mbanje.kurt.remote_service.internal.ParameterClient;
+import mbanje.kurt.remote_service.internal.ParameterServer;
+import mbanje.kurt.remote_service.internal.ServerMethod;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -20,19 +23,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.*;
 
-import mbanje.kurt.remote_service.RemoteMessageClient;
-import mbanje.kurt.remote_service.RemoteMessageServer;
-import mbanje.kurt.remote_service.RemoteService;
-import mbanje.kurt.remote_service.RemoteServiceClient;
-import mbanje.kurt.remote_service.RemoteServiceServer;
-import mbanje.kurt.remote_service.processor.generators.GenerateClient;
-import mbanje.kurt.remote_service.processor.generators.GenerateClientHandler;
-import mbanje.kurt.remote_service.processor.generators.GenerateServerHandler;
-import mbanje.kurt.remote_service.processor.internal.ClientMethod;
-import mbanje.kurt.remote_service.processor.internal.ParameterClient;
-import mbanje.kurt.remote_service.processor.internal.ParameterServer;
-import mbanje.kurt.remote_service.processor.internal.ServerMethod;
 
 public class RemoteServiceProcessor extends AbstractProcessor {
 
@@ -49,7 +41,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> annotations = new LinkedHashSet<>();
+        Set<String> annotations = new LinkedHashSet<String>();
         annotations.add(RemoteService.class.getCanonicalName());
         annotations.add(RemoteServiceClient.class.getCanonicalName());
         annotations.add(RemoteServiceServer.class.getCanonicalName());
@@ -65,9 +57,9 @@ public class RemoteServiceProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment environment) {
-        List<Element> services = new ArrayList<>();
-        Map<String,List<ParameterClient>> clients = new HashMap<>();
-        Map<String,List<ParameterServer>> servers = new HashMap<>();
+        List<Element> services = new ArrayList<Element>();
+        Map<String,List<ParameterClient>> clients = new HashMap<String,List<ParameterClient>>();
+        Map<String,List<ParameterServer>> servers = new HashMap<String,List<ParameterServer>>();
 
         parseServices(environment, services);
         parseClients(environment, clients);
@@ -106,7 +98,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             final TypeMirror client = helper.clientValue(clientAnnotation);
             final String service = ((DeclaredType) client).asElement().getSimpleName().toString();
 //            String clazz = ((TypeElement) element).getQualifiedName().toString();
-            List<ParameterClient> methods = new ArrayList<>();
+            List<ParameterClient> methods = new ArrayList<ParameterClient>();
 
             if(!helper.isInterface(element.asType())){
                 messenger.error(element, "%s can only be applied on interfaces, class %s is not an interface", clientAnnotation,element.getSimpleName());
@@ -157,7 +149,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             final TypeMirror server = helper.serverValue(serverAnnotation);
             final String service = ((DeclaredType) server).asElement().getSimpleName().toString();
 //            String clazz = ((TypeElement) element).getQualifiedName().toString();
-            List<ParameterServer> methods = new ArrayList<>();
+            List<ParameterServer> methods = new ArrayList<ParameterServer>();
 
             if(!helper.isInterface(element.asType())){
                 messenger.error(element, "%s can only be applied on interfaces, class %s is not an interface", serverAnnotation,element.getSimpleName());

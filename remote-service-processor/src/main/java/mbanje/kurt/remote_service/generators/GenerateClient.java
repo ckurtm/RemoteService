@@ -1,4 +1,4 @@
-package mbanje.kurt.remote_service.processor.generators;
+package mbanje.kurt.remote_service.generators;
 
 
 import com.squareup.javapoet.ClassName;
@@ -7,6 +7,10 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import mbanje.kurt.remote_service.processor.Messenger;
+import mbanje.kurt.remote_service.processor.ProcessorHelper;
+import mbanje.kurt.remote_service.internal.ParameterClient;
+import mbanje.kurt.remote_service.internal.ParameterServer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,10 +21,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
-import mbanje.kurt.remote_service.processor.Messenger;
-import mbanje.kurt.remote_service.processor.ProcessorHelper;
-import mbanje.kurt.remote_service.processor.internal.ParameterClient;
-import mbanje.kurt.remote_service.processor.internal.ParameterServer;
+
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -153,7 +154,7 @@ public class GenerateClient {
 
 
     private List<MethodSpec> getMethods(){
-        List<MethodSpec> methods = new ArrayList<>();
+        List<MethodSpec> methods = new ArrayList<MethodSpec>();
         for(ParameterClient method:clientMethods){
             MethodSpec.Builder builder = MethodSpec.methodBuilder(method.variable.name);
             builder.addModifiers(PUBLIC);
