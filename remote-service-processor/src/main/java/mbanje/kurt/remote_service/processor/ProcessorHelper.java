@@ -1,11 +1,6 @@
 package mbanje.kurt.remote_service.processor;
 
 import com.squareup.javapoet.ClassName;
-import mbanje.kurt.remote_service.IServiceClient;
-import mbanje.kurt.remote_service.IServiceServer;
-import mbanje.kurt.remote_service.RemoteServiceClient;
-import mbanje.kurt.remote_service.RemoteServiceServer;
-import mbanje.kurt.remote_service.internal.UnnamedPackageException;
 
 import java.util.List;
 
@@ -20,7 +15,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
-
+import mbanje.kurt.remote_service.IServiceClient;
+import mbanje.kurt.remote_service.IServiceServer;
+import mbanje.kurt.remote_service.RemoteServiceClient;
+import mbanje.kurt.remote_service.RemoteServiceServer;
+import mbanje.kurt.remote_service.processor.internal.UnnamedPackageException;
 
 import static javax.lang.model.element.ElementKind.INTERFACE;
 
