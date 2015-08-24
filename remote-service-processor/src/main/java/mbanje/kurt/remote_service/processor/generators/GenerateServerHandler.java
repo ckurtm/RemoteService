@@ -121,13 +121,13 @@ public class GenerateServerHandler {
                                 "        switch (msg.what) {\n" +
                                 "         case $T.CONNECT:\n" +
                                 "            clients.add(msg.replyTo);\n" +
-                                "            $L message  = $L.obtain(null, $T.DISCONNECT);\n" +
-                                "            post(message);\n" +
+                                "            $L message  = $L.obtain(null, $T.CONNECT);\n" +
+                                "            send(message);\n" +
                                 "            break;\n" +
                                 "         case $T.DISCONNECT:\n" +
                                 "            clients.remove(msg.replyTo);\n" +
-                                "            $L message1  = $L.obtain(null, $T.CONNECT);\n" +
-                                "            post(message1);\n" +
+                                "            $L message1  = $L.obtain(null, $T.DISCONNECT);\n" +
+                                "            send(message1);\n" +
                                 "            break;\n" +
                                 "         case $T.SHUTDOWN:\n" +
                                 "            (($T)service).stopSelf();\n" +
@@ -138,7 +138,7 @@ public class GenerateServerHandler {
                 .addCode("         default:\n" +
                         "            super.handleMessage(msg);\n" +
                         "        }\n" +
-                        "        removeMessages(msg.what);\n" +
+                        "       removeMessages(msg.what);\n" +
                         " }")
                 .build();
     }
@@ -146,15 +146,15 @@ public class GenerateServerHandler {
 
     private MethodSpec getSendMsg() {
         ClassName remoteExceptionClass = ClassName.get("java.lang","Exception");
-        return MethodSpec.methodBuilder("post")
+        return MethodSpec.methodBuilder("send")
                 .returns(void.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ProcessorHelper.MESSAGE, "message")
-                .beginControlFlow("for (int i = clients.size()-1; i >0; i--)")
+                .beginControlFlow("for (int i =0;i< clients.size();i++)")
                 .addCode(" try {\n" +
                         "     clients.get(i).send(message);\n" +
                         " } catch ($T e) {\n" +
-                        "      //clients.remove(i);\n" +
+                        "      clients.remove(i);\n" +
                         "}",remoteExceptionClass)
                 .endControlFlow()
                 .build();

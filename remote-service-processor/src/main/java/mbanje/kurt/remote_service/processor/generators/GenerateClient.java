@@ -89,7 +89,7 @@ public class GenerateClient {
                                 "           serviceMessenger = new $T(service);\n" +
                                 "           bound=true;\n" +
                                 "           Log.d(TAG, \"service connected\");\n" +
-                                "           post($T.obtain(null, $T.CONNECT));\n" +
+                                "           send($T.obtain(null, $T.CONNECT));\n" +
                                 "}\n" +
                                 " \n" +
                                 " public void onServiceDisconnected($T className) {\n" +
@@ -167,7 +167,7 @@ public class GenerateClient {
                         .build();
                 builder.addParameter(arg);
             }
-            builder.addStatement("post($T.obtain(null,$L,$L))",ProcessorHelper.MESSAGE,method.variable.message,paramname);
+            builder.addStatement("send($T.obtain(null,$L,$L))",ProcessorHelper.MESSAGE,method.variable.message,paramname);
             methods.add(builder.build());
 
         }
@@ -201,7 +201,7 @@ public class GenerateClient {
                 .addModifiers(Modifier.PUBLIC)
                 .addCode("if (bound) {\n" +
                         "   if(serviceMessenger != null) {\n" +
-                        "post($T.obtain(null,$T.DISCONNECT));\n" +
+                        "send($T.obtain(null,$T.DISCONNECT));\n" +
                         "}\n" +
                         "parent.unbindService(connection);\n" +
                         "bound = false;\n" +
@@ -212,7 +212,7 @@ public class GenerateClient {
 
     private MethodSpec getSendMsg() {
         ClassName remoteExceptionClass = ClassName.get("android.os","RemoteException");
-        return MethodSpec.methodBuilder("post")
+        return MethodSpec.methodBuilder("send")
                 .returns(boolean.class)
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ProcessorHelper.MESSAGE, "message")

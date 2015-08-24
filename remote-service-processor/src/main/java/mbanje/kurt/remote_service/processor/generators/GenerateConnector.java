@@ -100,14 +100,14 @@ public class GenerateConnector {
     }
 
    private MethodSpec getPost() {
-        return MethodSpec.methodBuilder("post")
+        return MethodSpec.methodBuilder("send")
                 .returns(void.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(int.class, "id")
                 .addParameter(Object.class,"object")
-                .addStatement("$T message = $T.obtain(handler,id)",ProcessorHelper.MESSAGE,ProcessorHelper.MESSAGE)
+                .addStatement("$T message = $T.obtain(null,id)",ProcessorHelper.MESSAGE,ProcessorHelper.MESSAGE)
                 .addStatement("message.obj = object")
-                .addStatement("handler.sendMessage(message)")
+                .addStatement("handler.send(message)")
                 .build();
     }
 }
