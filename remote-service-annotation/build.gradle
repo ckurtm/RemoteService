@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'ckm.simple'
-version = '1.0.6'
+version = '1.0.4'
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -13,7 +13,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = 'maven'
-        name = 'SimpleRemoteService'
+        name = 'RemoteService'
         userOrg = user
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/ckurtm/simple-sql-provider.git'
@@ -21,9 +21,9 @@ bintray {
         publicDownloadNumbers = true
         attributes= ['G+': ['https://plus.google.com/u/0/+KurtMbanje'], 'Twitter': ['@ckurtm']]
         version {
-            name = '1.0.6'
+            name = '1.0.4'
             desc = 'Create a Simple Remote Service without the boilerplate '
-            vcsTag = '1.0.6'
+            vcsTag = '1.0.4'
         }
     }
 }
