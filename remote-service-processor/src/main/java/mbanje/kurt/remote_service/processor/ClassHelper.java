@@ -27,21 +27,18 @@ import static javax.lang.model.element.ElementKind.INTERFACE;
 /**
  * Created by kurt on 05 07 2015 .
  */
-public class ProcessorHelper {
+public class ClassHelper {
     public final String PARCELABLE = "android.os.Parcelable";
     public final String SERVICE_CLASS = "android.app.Service";
     public static final String SERVICE_CLIENT_INTERFACE = IServiceClient.class.getCanonicalName();
     public static final String SERVICE_SERVER_INTERFACE = IServiceServer.class.getCanonicalName();
 
-    public static final String PACKAGE = "mbanje.kurt.remote_service";
 
     public static final ClassName MESSAGE = ClassName.get("android.os", "Message");
     public static final ClassName WEAK_REFERENCE = ClassName.get("java.lang.ref", "WeakReference");
-    public static final ClassName ISERVICE_CLIENT = ClassName.get(PACKAGE, "IServiceClient");
     public static final ClassName HANDLER = ClassName.get("android.os", "Handler");
     public static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
     public static final ClassName SERVICE = ClassName.get("android.app", "Service");
-    public static final ClassName ISERVICE_SERVER = ClassName.get(PACKAGE, "IServiceServer");
     public static final ClassName MESSENGER = ClassName.get("android.os", "Messenger");
     public static final ClassName ACTIVITY = ClassName.get("android.app", "Activity");
     public static final ClassName COMPONENT = ClassName.get("android.content","ComponentName");
@@ -132,7 +129,7 @@ public class ProcessorHelper {
     }
 
 
-    public String getPackageName(Elements elementUtils, TypeElement type) throws UnnamedPackageException {
+    public static String getPackageName(Elements elementUtils, TypeElement type) throws UnnamedPackageException {
         PackageElement pkg = elementUtils.getPackageOf(type);
         if (pkg.isUnnamed()) {
             throw new UnnamedPackageException(type);

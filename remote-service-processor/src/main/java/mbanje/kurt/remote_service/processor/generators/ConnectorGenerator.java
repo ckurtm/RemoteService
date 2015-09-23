@@ -16,7 +16,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import mbanje.kurt.remote_service.processor.Messenger;
-import mbanje.kurt.remote_service.processor.ProcessorHelper;
+import mbanje.kurt.remote_service.processor.ClassHelper;
 import mbanje.kurt.remote_service.processor.internal.ParameterClient;
 
 import static javax.lang.model.element.Modifier.FINAL;
@@ -25,18 +25,19 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 /**
  * Created by kurt on 28 07 2015 .
  */
-public class GenerateConnector {
+public class ConnectorGenerator {
 
     private final Element service;
     private final List<ParameterClient> clientMethods;
-    private final String clazz;
+    private final String clazz,packageName;
     private Element client,server;
     private ClassName clientInterface,serverInterface;
     private Messenger messenger;
 
-    public GenerateConnector(Element service, List<ParameterClient> clientMethods) {
+    public ConnectorGenerator(String packageName,Element service, List<ParameterClient> clientMethods) {
         this.service = service;
-        serverInterface = ClassName.get(ProcessorHelper.PACKAGE, service.getSimpleName() + "ServerHandler");
+        this.packageName = packageName;
+        serverInterface = ClassName.get(packageName, service.getSimpleName() + "ServerHandler");
         this.clientMethods = clientMethods;
         this.clazz = service.getSimpleName() + "Connector";
     }
@@ -45,7 +46,7 @@ public class GenerateConnector {
         client = clientMethods.get(0).variable.clazz;
         clientInterface = ClassName.get((TypeElement)client);
         this.messenger = messenger;
-        JavaFile javaFile = JavaFile.builder(ProcessorHelper.PACKAGE, generateClass()).build();
+        JavaFile javaFile = JavaFile.builder(packageName, generateClass()).build();
         try {
             javaFile.writeTo(filer);
         } catch (IOException e) {
@@ -60,7 +61,7 @@ public class GenerateConnector {
                 .addModifiers(Modifier.PRIVATE)
                 .build();
 
-        FieldSpec messenger = FieldSpec.builder(ProcessorHelper.MESSENGER, "messenger")
+        FieldSpec messenger = FieldSpec.builder(ClassHelper.MESSENGER, "messenger")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build();
 
@@ -79,13 +80,13 @@ public class GenerateConnector {
     }
 
     private MethodSpec getConstructor() {
-        ClassName clientHandlerClass = ClassName.get(ProcessorHelper.PACKAGE, service.getSimpleName() + GenerateClientHandler.SUFFIX);
+        ClassName clientHandlerClass = ClassName.get(packageName, service.getSimpleName() + ClientHandlerGenerator.SUFFIX);
 
         return  MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(clientInterface, "client")
                 .addStatement("handler = new $T(client)", serverInterface)
-                .addStatement("messenger = new $T(handler)", ProcessorHelper.MESSENGER)
+                .addStatement("messenger = new $T(handler)", ClassHelper.MESSENGER)
                 .build();
     }
 
@@ -93,7 +94,7 @@ public class GenerateConnector {
 
     private MethodSpec getBinder(){
         return MethodSpec.methodBuilder("getBinder")
-                .returns(ProcessorHelper.IBINDER)
+                .returns(ClassHelper.IBINDER)
                 .addModifiers(Modifier.PUBLIC)
                 .addStatement("return messenger.getBinder()")
                 .build();
@@ -105,7 +106,7 @@ public class GenerateConnector {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(int.class, "id")
                 .addParameter(Object.class,"object")
-                .addStatement("$T message = $T.obtain(null,id)",ProcessorHelper.MESSAGE,ProcessorHelper.MESSAGE)
+                .addStatement("$T message = $T.obtain(null,id)", ClassHelper.MESSAGE, ClassHelper.MESSAGE)
                 .addStatement("message.obj = object")
                 .addStatement("handler.send(message)")
                 .build();

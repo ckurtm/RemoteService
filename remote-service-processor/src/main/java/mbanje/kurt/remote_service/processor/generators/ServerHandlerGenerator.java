@@ -16,8 +16,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
+import mbanje.kurt.remote_service.IServiceClient;
 import mbanje.kurt.remote_service.processor.Messenger;
-import mbanje.kurt.remote_service.processor.ProcessorHelper;
+import mbanje.kurt.remote_service.processor.ClassHelper;
 import mbanje.kurt.remote_service.processor.internal.ParameterClient;
 
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -25,20 +26,23 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 /**
  * Created by kurt on 28 07 2015 .
  */
-public class GenerateServerHandler {
+public class ServerHandlerGenerator {
 
     private final Element service;
     private final List<ParameterClient> clientMethods;
-    private final String clazz;
+    private final String clazz,packageName;
     private Element client;
     private ClassName clientInterface;
     private Messenger messenger;
     public static final String SUFFIX = "ServerHandler";
+    public final ClassName ISERVICE_CLIENT;
 
-    public GenerateServerHandler(Element service, List<ParameterClient> clientMethods) {
+    public ServerHandlerGenerator(String packageName,Element service, List<ParameterClient> clientMethods) {
         this.service = service;
+        this.packageName = packageName;
         this.clientMethods = clientMethods;
         this.clazz = service.getSimpleName() + SUFFIX;
+        ISERVICE_CLIENT = ClassName.get(IServiceClient.class);
     }
 
     public void generate(Messenger messenger,Filer filer) {
@@ -46,7 +50,7 @@ public class GenerateServerHandler {
         clientInterface = ClassName.get((TypeElement)client);
         this.messenger = messenger;
 //        messenger.note(service, "client methods %d", clientMethods.size());
-        JavaFile javaFile = JavaFile.builder(ProcessorHelper.PACKAGE, generateClass()).build();
+        JavaFile javaFile = JavaFile.builder(packageName, generateClass()).build();
         try {
             javaFile.writeTo(filer);
         } catch (IOException e) {
@@ -56,19 +60,19 @@ public class GenerateServerHandler {
 
 
     TypeSpec generateClass()  {
-        TypeName weakReferenceType = ParameterizedTypeName.get(ProcessorHelper.WEAK_REFERENCE, clientInterface);
+        TypeName weakReferenceType = ParameterizedTypeName.get(ClassHelper.WEAK_REFERENCE, clientInterface);
         FieldSpec reference = FieldSpec.builder(weakReferenceType, "reference")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build();
 
-        TypeName clientsType = ParameterizedTypeName.get(ProcessorHelper.ARRAY_LIST, ProcessorHelper.MESSENGER);
+        TypeName clientsType = ParameterizedTypeName.get(ClassHelper.ARRAY_LIST, ClassHelper.MESSENGER);
         FieldSpec clients = FieldSpec.builder(clientsType, "clients")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer("new $T<>()", ProcessorHelper.ARRAY_LIST)
+                .initializer("new $T<>()", ClassHelper.ARRAY_LIST)
                 .build();
 
         return TypeSpec.classBuilder(clazz)
-                .superclass(ProcessorHelper.HANDLER)
+                .superclass(ClassHelper.HANDLER)
                 .addModifiers(PUBLIC)
                 .addField(reference)
                 .addField(clients)
@@ -82,7 +86,7 @@ public class GenerateServerHandler {
         return  MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(TypeName.get(client.asType()), "reference")
-                .addStatement("this.reference = new $T<>(reference)", ProcessorHelper.WEAK_REFERENCE)
+                .addStatement("this.reference = new $T<>(reference)", ClassHelper.WEAK_REFERENCE)
                 .build();
     }
 
@@ -115,7 +119,7 @@ public class GenerateServerHandler {
         return MethodSpec.methodBuilder("handleMessage")
                 .returns(void.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ProcessorHelper.MESSAGE, "msg")
+                .addParameter(ClassHelper.MESSAGE, "msg")
                 .addStatement("$T service = reference.get()", clientInterface)
                 .addCode("if (service != null) {\n" +
                                 "        switch (msg.what) {\n" +
@@ -131,9 +135,9 @@ public class GenerateServerHandler {
                                 "            break;\n" +
                                 "         case $T.SHUTDOWN:\n" +
                                 "            (($T)service).stopSelf();\n" +
-                                "            break;\n", ProcessorHelper.ISERVICE_CLIENT, ProcessorHelper.MESSAGE, ProcessorHelper.MESSAGE,
-                        ProcessorHelper.ISERVICE_CLIENT, ProcessorHelper.ISERVICE_CLIENT, ProcessorHelper.MESSAGE, ProcessorHelper.MESSAGE,
-                        ProcessorHelper.ISERVICE_CLIENT, ProcessorHelper.ISERVICE_CLIENT, ProcessorHelper.SERVICE)
+                                "            break;\n", ISERVICE_CLIENT, ClassHelper.MESSAGE, ClassHelper.MESSAGE,
+                        ISERVICE_CLIENT, ISERVICE_CLIENT, ClassHelper.MESSAGE, ClassHelper.MESSAGE,
+                        ISERVICE_CLIENT, ISERVICE_CLIENT, ClassHelper.SERVICE)
                 .addCode(buffer.toString())
                 .addCode("         default:\n" +
                         "            super.handleMessage(msg);\n" +
@@ -149,7 +153,7 @@ public class GenerateServerHandler {
         return MethodSpec.methodBuilder("send")
                 .returns(void.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ProcessorHelper.MESSAGE, "message")
+                .addParameter(ClassHelper.MESSAGE, "message")
                 .beginControlFlow("for (int i =0;i< clients.size();i++)")
                 .addCode(" try {\n" +
                         "     clients.get(i).send(message);\n" +

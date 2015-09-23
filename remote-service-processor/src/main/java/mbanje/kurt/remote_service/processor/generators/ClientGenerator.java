@@ -18,7 +18,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import mbanje.kurt.remote_service.processor.Messenger;
-import mbanje.kurt.remote_service.processor.ProcessorHelper;
+import mbanje.kurt.remote_service.processor.ClassHelper;
 import mbanje.kurt.remote_service.processor.internal.ParameterClient;
 import mbanje.kurt.remote_service.processor.internal.ParameterServer;
 
@@ -30,18 +30,19 @@ import static javax.lang.model.element.Modifier.STATIC;
 /**
  * Created by kurt on 28 07 2015 .
  */
-public class GenerateClient {
+public class ClientGenerator {
 
     private final Element service;
     private final List<ParameterClient> clientMethods;
     private final List<ParameterServer> serverMethods;
-    private final String clazz;
+    private final String clazz,packageName;
     private Element client,server;
     private ClassName clientInterface,serverInterface;
     private Messenger messenger;
 
-    public GenerateClient(Element service, List<ParameterClient> clientMethods,List<ParameterServer> serverMethods) {
+    public ClientGenerator(String packageName,Element service, List<ParameterClient> clientMethods, List<ParameterServer> serverMethods) {
         this.service = service;
+        this.packageName = packageName;
         this.clientMethods = clientMethods;
         this.serverMethods = serverMethods;
         this.clazz = service.getSimpleName() + "Client";
@@ -53,7 +54,7 @@ public class GenerateClient {
         clientInterface = ClassName.get((TypeElement)client);
         serverInterface = ClassName.get((TypeElement)server);
         this.messenger = messenger;
-        JavaFile javaFile = JavaFile.builder(ProcessorHelper.PACKAGE, generateClass()).build();
+        JavaFile javaFile = JavaFile.builder(packageName, generateClass()).build();
         try {
             javaFile.writeTo(filer);
         } catch (IOException e) {
@@ -64,15 +65,15 @@ public class GenerateClient {
 
     TypeSpec generateClass()  {
 
-        FieldSpec activity = FieldSpec.builder(ProcessorHelper.ACTIVITY, "parent")
+        FieldSpec activity = FieldSpec.builder(ClassHelper.ACTIVITY, "parent")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build();
 
-        FieldSpec messenger = FieldSpec.builder(ProcessorHelper.MESSENGER, "messenger")
+        FieldSpec messenger = FieldSpec.builder(ClassHelper.MESSENGER, "messenger")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build();
 
-        FieldSpec serviceMessenger = FieldSpec.builder(ProcessorHelper.MESSENGER, "serviceMessenger")
+        FieldSpec serviceMessenger = FieldSpec.builder(ClassHelper.MESSENGER, "serviceMessenger")
                 .addModifiers(Modifier.PRIVATE, STATIC)
                 .initializer("null")
                 .build();
@@ -82,7 +83,7 @@ public class GenerateClient {
                 .initializer(clazz + ".class.getSimpleName();")
                 .build();
 
-        FieldSpec connection = FieldSpec.builder(ProcessorHelper.SERVICECONNECTION, "connection")
+        FieldSpec connection = FieldSpec.builder(ClassHelper.SERVICECONNECTION, "connection")
                 .addModifiers(Modifier.PRIVATE)
                 .initializer("new $T() {\n" +
                                 " public void onServiceConnected($T className, $T service) {\n" +
@@ -96,8 +97,8 @@ public class GenerateClient {
                                 "          serviceMessenger = null;\n" +
                                 "          $T.d(TAG, \"service disconnected\");\n" +
                                 "}\n" +
-                                "};", ProcessorHelper.SERVICECONNECTION, ProcessorHelper.COMPONENT, ProcessorHelper.IBINDER,
-                        ProcessorHelper.MESSENGER, ProcessorHelper.MESSAGE, clientInterface, ProcessorHelper.COMPONENT, ProcessorHelper.LOG
+                                "};", ClassHelper.SERVICECONNECTION, ClassHelper.COMPONENT, ClassHelper.IBINDER,
+                        ClassHelper.MESSENGER, ClassHelper.MESSAGE, clientInterface, ClassHelper.COMPONENT, ClassHelper.LOG
 
                 )
                 .build();
@@ -128,24 +129,24 @@ public class GenerateClient {
     }
 
     private MethodSpec getConstructor() {
-        ClassName clientHandlerClass = ClassName.get(ProcessorHelper.PACKAGE, service.getSimpleName() + GenerateClientHandler.SUFFIX);
+        ClassName clientHandlerClass = ClassName.get(packageName, service.getSimpleName() + ClientHandlerGenerator.SUFFIX);
         return  MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
-                .addParameter(ProcessorHelper.ACTIVITY, "activity")
+                .addParameter(ClassHelper.ACTIVITY, "activity")
                 .addParameter(serverInterface, "stub")
                 .addStatement("this.parent = activity")
-                .addStatement("messenger = new $T(new $T(stub))", ProcessorHelper.MESSENGER, clientHandlerClass)
+                .addStatement("messenger = new $T(new $T(stub))", ClassHelper.MESSENGER, clientHandlerClass)
                 .build();
     }
 
 
 
     private MethodSpec getStub(){
-        ClassName returnType = ClassName.get(ProcessorHelper.PACKAGE,clazz);
+        ClassName returnType = ClassName.get(packageName,clazz);
         return MethodSpec.methodBuilder("createStub")
                 .returns(returnType)
                 .addModifiers(Modifier.PUBLIC, STATIC)
-                .addParameter(ProcessorHelper.ACTIVITY, "parent")
+                .addParameter(ClassHelper.ACTIVITY, "parent")
                 .addParameter(serverInterface, "stub")
                 .addStatement("return new $T(parent,stub)",returnType)
                 .build();
@@ -167,7 +168,7 @@ public class GenerateClient {
                         .build();
                 builder.addParameter(arg);
             }
-            builder.addStatement("send($T.obtain(null,$L,$L))",ProcessorHelper.MESSAGE,method.variable.message,paramname);
+            builder.addStatement("send($T.obtain(null,$L,$L))", ClassHelper.MESSAGE,method.variable.message,paramname);
             methods.add(builder.build());
 
         }
@@ -189,8 +190,8 @@ public class GenerateClient {
                                 "}else{\n" +
                                 "   $T.d(TAG,\"not bound not connecting..\");\n" +
                                 "}"
-                        , serviceClass,ProcessorHelper.INTENT, serviceClass, ProcessorHelper.INTENT,
-                        serviceClass,ProcessorHelper.CONTEXT,ProcessorHelper.LOG,ProcessorHelper.LOG
+                        , serviceClass, ClassHelper.INTENT, serviceClass, ClassHelper.INTENT,
+                        serviceClass, ClassHelper.CONTEXT, ClassHelper.LOG, ClassHelper.LOG
                 )
                 .build();
     }
@@ -206,7 +207,7 @@ public class GenerateClient {
                         "parent.unbindService(connection);\n" +
                         "bound = false;\n" +
                         "$T.d(TAG,\"disconnecting..\");\n" +
-                        "}", ProcessorHelper.MESSAGE,clientInterface,ProcessorHelper.LOG)
+                        "}", ClassHelper.MESSAGE,clientInterface, ClassHelper.LOG)
                 .build();
     }
 
@@ -215,7 +216,7 @@ public class GenerateClient {
         return MethodSpec.methodBuilder("send")
                 .returns(boolean.class)
                 .addModifiers(Modifier.PRIVATE)
-                .addParameter(ProcessorHelper.MESSAGE, "message")
+                .addParameter(ClassHelper.MESSAGE, "message")
                 .addCode(" if(bound) {\n" +
                         "     try {\n" +
                         "       message.replyTo = messenger;\n" +
@@ -226,7 +227,7 @@ public class GenerateClient {
                         "     }\n" +
                         "  }\n" +
                         " return false;\n"
-                        , remoteExceptionClass, ProcessorHelper.LOG)
+                        , remoteExceptionClass, ClassHelper.LOG)
                 .build();
     }
 }

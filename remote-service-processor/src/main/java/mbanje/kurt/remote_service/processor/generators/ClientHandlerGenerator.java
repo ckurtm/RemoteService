@@ -16,8 +16,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
+import mbanje.kurt.remote_service.IServiceClient;
 import mbanje.kurt.remote_service.processor.Messenger;
-import mbanje.kurt.remote_service.processor.ProcessorHelper;
+import mbanje.kurt.remote_service.processor.ClassHelper;
 import mbanje.kurt.remote_service.processor.internal.ParameterServer;
 
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -25,27 +26,30 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 /**
  * Created by kurt on 28 07 2015 .
  */
-public class GenerateClientHandler {
+public class ClientHandlerGenerator {
 
     private final Element service;
     private final List<ParameterServer> serverMethods;
-    private final String clazz;
+    private final String clazz,thePackage;
     private Element server;
     private ClassName serverInterface;
     public static final String SUFFIX = "ClientHandler";
+    public final ClassName ISERVICE_CLIENT;
 
 
-    public GenerateClientHandler(Element service, List<ParameterServer> serverMethods) {
+    public ClientHandlerGenerator(String thePackage,Element service, List<ParameterServer> serverMethods) {
         this.service = service;
+        this.thePackage = thePackage;
         this.serverMethods = serverMethods;
         this.clazz = service.getSimpleName() + SUFFIX;
+        ISERVICE_CLIENT = ClassName.get(IServiceClient.class);
     }
 
     public void generate(Messenger messenger,Filer filer) {
 //        messenger.note(null,"servermethods: %d",serverMethods.size());
         server = serverMethods.get(0).variable.clazz;
         serverInterface = ClassName.get((TypeElement)server);
-        JavaFile javaFile = JavaFile.builder(ProcessorHelper.PACKAGE, generateClass()).build();
+        JavaFile javaFile = JavaFile.builder(thePackage, generateClass()).build();
         try {
             javaFile.writeTo(filer);
         } catch (IOException e) {
@@ -55,13 +59,13 @@ public class GenerateClientHandler {
 
 
     TypeSpec generateClass()  {
-        TypeName weakReferenceType = ParameterizedTypeName.get(ProcessorHelper.WEAK_REFERENCE, serverInterface);
+        TypeName weakReferenceType = ParameterizedTypeName.get(ClassHelper.WEAK_REFERENCE, serverInterface);
         FieldSpec reference = FieldSpec.builder(weakReferenceType, "reference")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build();
 
         return TypeSpec.classBuilder(clazz)
-                .superclass(ProcessorHelper.HANDLER)
+                .superclass(ClassHelper.HANDLER)
                 .addModifiers(PUBLIC)
                 .addField(reference)
                 .addMethod(getConstructor())
@@ -73,7 +77,7 @@ public class GenerateClientHandler {
         return  MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(TypeName.get(server.asType()), "reference")
-                .addStatement("this.reference = new $T<>(reference)", ProcessorHelper.WEAK_REFERENCE)
+                .addStatement("this.reference = new $T<>(reference)", ClassHelper.WEAK_REFERENCE)
                 .build();
     }
 
@@ -106,7 +110,7 @@ public class GenerateClientHandler {
         return MethodSpec.methodBuilder("handleMessage")
                 .returns(void.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ProcessorHelper.MESSAGE, "msg")
+                .addParameter(ClassHelper.MESSAGE, "msg")
                 .addStatement("$T stub = reference.get()",serverInterface)
                 .addCode("if (stub != null) {\n" +
                         "        switch (msg.what) {\n" +
@@ -118,7 +122,7 @@ public class GenerateClientHandler {
                         "            break;\n" +
                         "         case $T.SHUTDOWN:\n" +
                         "            stub.onBoundServiceConnectionChanged(false);\n" +
-                        "            break;\n", ProcessorHelper.ISERVICE_CLIENT, ProcessorHelper.ISERVICE_CLIENT, ProcessorHelper.ISERVICE_CLIENT)
+                        "            break;\n", ISERVICE_CLIENT, ISERVICE_CLIENT, ISERVICE_CLIENT)
                 .addCode(buffer.toString())
                 .addCode("         default:\n" +
                         "            super.handleMessage(msg);\n" +

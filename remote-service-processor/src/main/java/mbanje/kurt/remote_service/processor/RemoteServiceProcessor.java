@@ -1,6 +1,8 @@
 package mbanje.kurt.remote_service.processor;
 
 
+import com.squareup.javapoet.ClassName;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -20,32 +22,38 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
 
+import mbanje.kurt.remote_service.IServiceClient;
 import mbanje.kurt.remote_service.RemoteMessageClient;
 import mbanje.kurt.remote_service.RemoteMessageServer;
 import mbanje.kurt.remote_service.RemoteService;
 import mbanje.kurt.remote_service.RemoteServiceClient;
 import mbanje.kurt.remote_service.RemoteServiceServer;
-import mbanje.kurt.remote_service.processor.generators.GenerateClient;
-import mbanje.kurt.remote_service.processor.generators.GenerateClientHandler;
-import mbanje.kurt.remote_service.processor.generators.GenerateConnector;
-import mbanje.kurt.remote_service.processor.generators.GenerateServerHandler;
+import mbanje.kurt.remote_service.processor.generators.ClientGenerator;
+import mbanje.kurt.remote_service.processor.generators.ClientHandlerGenerator;
+import mbanje.kurt.remote_service.processor.generators.ConnectorGenerator;
+import mbanje.kurt.remote_service.processor.generators.ServerHandlerGenerator;
 import mbanje.kurt.remote_service.processor.internal.ClientMethod;
 import mbanje.kurt.remote_service.processor.internal.ParameterClient;
 import mbanje.kurt.remote_service.processor.internal.ParameterServer;
 import mbanje.kurt.remote_service.processor.internal.ServerMethod;
+import mbanje.kurt.remote_service.processor.internal.UnnamedPackageException;
 
 public class RemoteServiceProcessor extends AbstractProcessor {
 
     private final Messenger messenger = new Messenger();
-    private ProcessorHelper helper;
+    private ClassHelper helper;
     private Filer filer;
+    private Elements elementUtils;
+
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         messenger.init(processingEnv);
-        helper = new ProcessorHelper();
+        helper = new ClassHelper();
         filer = processingEnv.getFiler();
+        elementUtils = processingEnv.getElementUtils();
     }
 
     @Override
@@ -73,20 +81,29 @@ public class RemoteServiceProcessor extends AbstractProcessor {
         parseServices(environment, services);
         parseClients(environment, clients);
         parseServers(environment, servers);
+        ClassName serviceClientClass = ClassName.get(IServiceClient.class);
 
         for(Element service:services){
             final String servicename = service.getSimpleName().toString();
+            TypeElement typeElement = (TypeElement) service;
+            String packageName =  "";
 
-            GenerateClientHandler serviceClientGenerator = new GenerateClientHandler(service,servers.get(servicename));
+            try {
+                packageName = ClassHelper.getPackageName(elementUtils, typeElement);
+            } catch (UnnamedPackageException e) {
+                messenger.error(typeElement, "failed to determine package of this class");
+            }
+
+            ClientHandlerGenerator serviceClientGenerator = new ClientHandlerGenerator(packageName,service,servers.get(servicename));
             serviceClientGenerator.generate(messenger, filer);
 
-            GenerateServerHandler serviceServerGenerator = new GenerateServerHandler(service,clients.get(servicename));
+            ServerHandlerGenerator serviceServerGenerator = new ServerHandlerGenerator(packageName,service,clients.get(servicename));
             serviceServerGenerator.generate(messenger, filer);
 
-            GenerateClient clientGenerator = new GenerateClient(service,clients.get(servicename),servers.get(servicename));
+            ClientGenerator clientGenerator = new ClientGenerator(packageName,service,clients.get(servicename),servers.get(servicename));
             clientGenerator.generate(messenger, filer);
 
-            GenerateConnector connectorGenerator = new GenerateConnector(service,clients.get(servicename));
+            ConnectorGenerator connectorGenerator = new ConnectorGenerator(packageName,service,clients.get(servicename));
             connectorGenerator.generate(messenger,filer);
         }
         return true;
@@ -117,7 +134,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             }
 
             if(!helper.isValidServiceClientClass(element.asType())){
-                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(),ProcessorHelper.SERVICE_CLIENT_INTERFACE);
+                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(), ClassHelper.SERVICE_CLIENT_INTERFACE);
             }
 
             for(Element methodElement:element.getEnclosedElements()) {
@@ -168,7 +185,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             }
 
             if(!helper.isValidServiceServerClass(element.asType())){
-                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(),ProcessorHelper.SERVICE_SERVER_INTERFACE);
+                messenger.error(element, "%s: should extend from  %s", element.getClass().getCanonicalName(), ClassHelper.SERVICE_SERVER_INTERFACE);
             }
 
             for(Element methodElement:element.getEnclosedElements()) {
