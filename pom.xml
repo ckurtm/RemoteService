@@ -5,7 +5,7 @@
     <groupId>mbanje.kurt</groupId>
     <artifactId>remote_service</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.5</version>
+    <version>1.0.2</version>
 
     <name>remote-service</name>
 

@@ -79,6 +79,7 @@ public class ServerHandlerGenerator {
                 .addMethod(getConstructor())
                 .addMethod(getMessageHandler())
                 .addMethod(getSendMsg())
+                .addMethod(getClients())
                 .build();
     }
 
@@ -161,6 +162,15 @@ public class ServerHandlerGenerator {
                         "      clients.remove(i);\n" +
                         "}",remoteExceptionClass)
                 .endControlFlow()
+                .build();
+    }
+
+
+    private MethodSpec getClients() {
+        TypeName clientsType = ParameterizedTypeName.get(ClassHelper.ARRAY_LIST, ClassHelper.MESSENGER);
+        return MethodSpec.methodBuilder("getClients")
+                .returns(clientsType)
+                .addStatement("return clients")
                 .build();
     }
 }
