@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'ckm.simple'
-version = '1.0.1'
+version = '1.0.3'
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -21,10 +21,10 @@ bintray {
         publicDownloadNumbers = true
         attributes= ['G+': ['https://plus.google.com/u/0/+KurtMbanje'], 'Twitter': ['@ckurtm']]
         version {
-            name = '1.0.1'
+            name = '1.0.3'
             desc = 'Create a Simple Remote Service without the boilerplate '
-            vcsTag = '1.0.1'
-            attributes = ['gradle-plugin': 'ckm.simple:remote-server:1.0.1']
+            vcsTag = '1.0.3'
+            attributes = ['gradle-plugin': 'ckm.simple:remote-server:1.0.3']
         }
     }
 }

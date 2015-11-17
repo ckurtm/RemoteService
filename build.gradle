@@ -12,9 +12,6 @@ buildscript {
 
 apply plugin: 'com.jfrog.bintray'
 
-group = 'ckm.simple'
-version = '1.0.1'
-
 
 allprojects {
     repositories {
