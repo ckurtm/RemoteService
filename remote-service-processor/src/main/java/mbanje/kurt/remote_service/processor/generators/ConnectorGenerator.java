@@ -5,6 +5,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
@@ -72,7 +74,9 @@ public class ConnectorGenerator {
                 .addField(messenger)
                 .addMethod(getConstructor())
                 .addMethod(getBinder())
-                .addMethod(getPost());
+                .addMethod(getSend())
+                .addMethod(getClients())
+                ;
 
 
         return builder.build();
@@ -100,15 +104,23 @@ public class ConnectorGenerator {
                 .build();
     }
 
-   private MethodSpec getPost() {
+   private MethodSpec getSend() {
         return MethodSpec.methodBuilder("send")
                 .returns(void.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(int.class, "id")
-                .addParameter(Object.class,"object")
+                .addParameter(Object.class, "object")
                 .addStatement("$T message = $T.obtain(null,id)", ClassHelper.MESSAGE, ClassHelper.MESSAGE)
                 .addStatement("message.obj = object")
                 .addStatement("handler.send(message)")
+                .build();
+    }
+
+    private MethodSpec getClients() {
+        TypeName clientsType = ParameterizedTypeName.get(ClassHelper.ARRAY_LIST, ClassHelper.MESSENGER);
+        return MethodSpec.methodBuilder("getClients")
+                .returns(clientsType)
+                .addStatement("return handler.getClients()")
                 .build();
     }
 }
