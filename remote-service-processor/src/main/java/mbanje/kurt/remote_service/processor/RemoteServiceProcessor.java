@@ -111,7 +111,7 @@ public class RemoteServiceProcessor extends AbstractProcessor {
 
     private void parseServices(RoundEnvironment environment,List<Element> services){
         for (Element element : environment.getElementsAnnotatedWith(RemoteService.class)) {
-            messenger.note(element, "parseServices %s", element);
+//            messenger.note(element, "parseServices %s", element);
             if(!helper.isValidService(element.asType())){
                 messenger.error(element, "@RemoteService can only be used on subclasses of Service class");
             }else {
