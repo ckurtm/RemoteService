@@ -104,14 +104,14 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             clientGenerator.generate(messenger, filer);
 
             ConnectorGenerator connectorGenerator = new ConnectorGenerator(packageName,service,clients.get(servicename));
-            connectorGenerator.generate(messenger,filer);
+            connectorGenerator.generate(messenger, filer);
         }
         return true;
     }
 
     private void parseServices(RoundEnvironment environment,List<Element> services){
         for (Element element : environment.getElementsAnnotatedWith(RemoteService.class)) {
-//            messenger.note(element,"parseServices %s",element);
+            messenger.note(element, "parseServices %s", element);
             if(!helper.isValidService(element.asType())){
                 messenger.error(element, "@RemoteService can only be used on subclasses of Service class");
             }else {
@@ -138,33 +138,36 @@ public class RemoteServiceProcessor extends AbstractProcessor {
             }
 
             for(Element methodElement:element.getEnclosedElements()) {
+//                messenger.note(element,"methodElement %s",methodElement);
                 final RemoteMessageClient messageAnnotation = methodElement.getAnnotation(RemoteMessageClient.class);
-                final ExecutableElement executable = (ExecutableElement) methodElement;
-                List<? extends VariableElement> parameters = executable.getParameters();
-                TypeMirror returnType = executable.getReturnType();
+                if(methodElement instanceof  ExecutableElement) {
+                    final ExecutableElement executable = (ExecutableElement) methodElement;
+                    List<? extends VariableElement> parameters = executable.getParameters();
+                    TypeMirror returnType = executable.getReturnType();
 
-                if(returnType.getKind() != TypeKind.VOID){
-                    messenger.error(methodElement, "%s method should return void", methodElement.getSimpleName());
-                }
-
-                ClientMethod method = new ClientMethod(service,element,methodElement.getSimpleName().toString(),messageAnnotation.value());
-                ParameterClient parameterClient = null;
-                if(parameters.size() == 0){
-                    parameterClient = new ParameterClient(method,null,true);
-                }
-                for (int i = 0; i < parameters.size(); i++) {
-                    VariableElement param = parameters.get(i);
-//                    messenger.note(param,"compare %s -> %s",param.asType().toString(),String.class.getCanonicalName());
-                    if(!helper.isValidParameter(param.asType())) {
-                        messenger.error(param, "%s cannot be used, parameters should be primitives or implement Parcelable", param.asType());
-                    }else{
-                        parameterClient = new ParameterClient(method,param,true);
-                        method.params.add(parameterClient);
+                    if (returnType.getKind() != TypeKind.VOID) {
+                        messenger.error(methodElement, "%s method should return void", methodElement.getSimpleName());
                     }
-                }
-//                messenger.note(methodElement, "%s -> %s",service, method.toString());
-                if (parameterClient != null) {
-                    methods.add(parameterClient);
+
+                    ClientMethod method = new ClientMethod(service, element, methodElement.getSimpleName().toString(), messageAnnotation.value());
+                    ParameterClient parameterClient = null;
+                    if (parameters.size() == 0) {
+                        parameterClient = new ParameterClient(method, null, true);
+                    }
+                    for (int i = 0; i < parameters.size(); i++) {
+                        VariableElement param = parameters.get(i);
+//                        messenger.note(param, "compare %s -> %s", param.asType().toString(), String.class.getCanonicalName());
+                        if (!helper.isValidParameter(param.asType())) {
+                            messenger.error(param, "%s cannot be used, parameters should be primitives or implement Parcelable", param.asType());
+                        } else {
+                            parameterClient = new ParameterClient(method, param, true);
+                            method.params.add(parameterClient);
+                        }
+                    }
+//                    messenger.note(methodElement, "%s -> %s", service, method.toString());
+                    if (parameterClient != null) {
+                        methods.add(parameterClient);
+                    }
                 }
             }
             clients.put(service, methods);
